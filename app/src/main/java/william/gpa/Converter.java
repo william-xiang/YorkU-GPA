@@ -81,7 +81,7 @@ public class Converter {
         }
 
         SpannableString title1 = new SpannableString("Your GPA is:\n");
-        SpannableString result = new SpannableString(pointes9 / credits + "(9.0 Scale)\n" + pointes4 / credits + "(4.0 Scale)\n");
+        SpannableString result = new SpannableString(String.format("%.2f", pointes9 / credits) + "(9.0 Scale)\n" + String.format("%.2f", pointes4 / credits) + "(4.0 Scale)\n");
         SpannableString clarify = new SpannableString("-- Conversion based on OLSAS Conversion Table\n\n\n");
         SpannableString title2 = new SpannableString("Course Detail:\n");
         SpannableString detail = new SpannableString(tempResult);

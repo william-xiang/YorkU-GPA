@@ -31,10 +31,12 @@ public class MainActivity extends AppCompatActivity {
 
     WebView webView;
     TextView text;
-    Button button;
+    Button logoutButton;
+    Button exitButton;
     static String realUrl;
     String cookie;
     Converter converter;
+    CookieManager cookieManager;
 
     @SuppressLint("NewApi")
     @Override
@@ -42,11 +44,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         text = new TextView(this);
-        button = new Button(this);
+        logoutButton = new Button(this);
+        exitButton = new Button(this);
 
         CookieSyncManager.createInstance(this);
-        final CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.removeAllCookies(null);
+        cookieManager = CookieManager.getInstance();
+        //cookieManager.removeAllCookies(null);
         webView = findViewById(R.id.webView);
         webView.getSettings().setJavaScriptEnabled(true); // enable javascript
 
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle(R.string.app_name);
             builder.setIcon(R.mipmap.ic_launcher);
-            builder.setMessage("It does not have internet connection!\nDo you want to refresh the app?")
+            builder.setMessage("Bad internet connection!\nDo you want to refresh the app?")
                     .setCancelable(false)
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
@@ -91,10 +94,20 @@ public class MainActivity extends AppCompatActivity {
             alert.show();
         }
 
-        button.setOnClickListener(new View.OnClickListener() {
+        exitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new doit().execute();
+                onBackPressed();
+            }
+        });
+
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = getIntent();
+                cookieManager.removeAllCookies(null);
+                finish();
+                startActivity(intent);
             }
         });
     }
@@ -141,16 +154,39 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            LinearLayout resultLayout = new LinearLayout(MainActivity.this);
-            RelativeLayout.LayoutParams textViewParams = new RelativeLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT);
-            textViewParams.setMargins(15, 15, 15, 15);
 
-            setContentView(resultLayout);
-            resultLayout.setOrientation(LinearLayout.VERTICAL);
+            int viewHeight = findViewById(R.id.mainLayout).getHeight();
+            int buttonHeight = 130;
+            int height = viewHeight - buttonHeight * 2 - 10;
+
+            RelativeLayout.LayoutParams textViewParams = new RelativeLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    height);
+            textViewParams.setMargins(15, 15, 15, 15);
             text.setMovementMethod(new ScrollingMovementMethod());
             text.setText(converter.getResult());
+
+            RelativeLayout.LayoutParams exitButtonParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
+                    buttonHeight);
+            exitButtonParams.setMargins(5, 0, 5, 0);
+            exitButtonParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            exitButton.setGravity(Gravity.CENTER);
+            exitButton.setLayoutParams(exitButtonParams);
+            exitButton.setText("Exit without logout YorkU Passport");
+
+            RelativeLayout.LayoutParams logoutButtonParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
+                    buttonHeight);
+            logoutButtonParams.setMargins(5, 0, 5, 120);
+            //logoutButtonParams.addRule(RelativeLayout.BELOW, text.getId());
+            logoutButtonParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            logoutButton.setGravity(Gravity.CENTER);
+            logoutButton.setLayoutParams(logoutButtonParams);
+            logoutButton.setText("Logout YorkU Passport");
+
+            RelativeLayout resultLayout = new RelativeLayout(MainActivity.this);
             resultLayout.addView(text, textViewParams);
+            resultLayout.addView(logoutButton);
+            resultLayout.addView(exitButton);
+            setContentView(resultLayout);
         }
     }
 }
